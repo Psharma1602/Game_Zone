@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>SlytherX Snake</title>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=New+Tegomin&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0
+        }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: radial-gradient(circle at top, #1f0036, #0d001a 60%);
+            font-family: "New Tegomin", serif;
+        }
+
+        body::before {
+            content: "";
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, #00f7ff33, #ff00ff33);
+            filter: blur(120px);
+            z-index: -1;
+        }
+
+        #board {
+            background: radial-gradient(circle at center, #1e1e2f, #0f0f1a);
+            width: 90vmin;
+            height: 93vmin;
+            border: 4px solid #00f7ff;
+            box-shadow: 0 0 30px #00f7ff;
+            display: grid;
+            grid-template-rows: repeat(18, 1fr);
+            grid-template-columns: repeat(18, 1fr);
+        }
+
+        #scoreBox,
+        #hiScoreBox {
+            position: absolute;
+            top: 30px;
+            font-size: 22px;
+            color: white;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 10px 20px;
+            border-radius: 12px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 0 10px #00f7ff;
+        }
+
+        #scoreBox {
+            right: 40px
+        }
+
+        #hiScoreBox {
+            left: 40px
+        }
+
+        #heading {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            text-align: center;
+            font-size: 50px;
+            letter-spacing: 3px;
+            color: #00f7ff;
+            text-shadow: 0 0 15px #00f7ff, 0 0 30px #00f7ff;
+        }
+
+        .subtitle {
+            display: block;
+            font-size: 18px;
+            color: #ff00ff;
+            letter-spacing: 2px;
+            margin-top: 5px;
+        }
+
+        .head {
+            background: linear-gradient(45deg, #00ffcc, #00f7ff);
+            border-radius: 50%;
+            box-shadow: 0 0 15px #00ffcc;
+        }
+
+        .snake {
+            background-color: #4b0082;
+            border-radius: 50%;
+            box-shadow: 0 0 8px #a020f0;
+        }
+
+        .food {
+            background: linear-gradient(red, purple);
+            border-radius: 50%;
+            animation: pulse .8s infinite alternate;
+        }
+
+        @keyframes pulse {
+            from {
+                transform: scale(.9)
+            }
+
+            to {
+                transform: scale(1.1)
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="heading">
+        🐍 SlytherX
+        <span class="subtitle">Retro Arcade Snake</span>
+    </div>
+
+    <div id="scoreBox">Score: 0</div>
+    <div id="hiScoreBox">High Score: 0</div>
+    <div id="board"></div>
+
+    <script>
+
+        // Game variables
+        let inputDir = { x: 0, y: 0 }
+        const foodSound = new Audio('eating.mp3')
+        const gameOverSound = new Audio('gameover.mp3')
+        const changeDirection = new Audio('direction.mp3')
+        const gameSound = new Audio('audio.mp3')
+        gameSound.loop = true
+        gameSound.volume = 0.4
+
+        let audioUnlocked = false;
+
+        function unlockAudio() {
+            if (audioUnlocked) return;
+
+            foodSound.load();
+            gameOverSound.load();
+            changeDirection.load();
+            gameSound.load();
+
+            audioUnlocked = true;
+        }
+
+        window.addEventListener("keydown", unlockAudio);
+        let speed = 5
+        let lastPaintTime = 0
+        let snakeArr = [{ x: 13, y: 15 }]
+        let food = { x: 6, y: 7 }
+        let score = 0
+
+        const board = document.getElementById("board")
+        const scoreBox = document.getElementById("scoreBox")
+        const hiScoreBox = document.getElementById("hiScoreBox")
+
+        function main(currtime) {
+            window.requestAnimationFrame(main)
+            if ((currtime - lastPaintTime) / 1000 < 1 / speed) return
+            lastPaintTime = currtime
+            gameEngine()
+        }
+
+        function isDead(sarr) {
+            for (let i = 1; i < sarr.length; i++) {
+                if (sarr[i].x === sarr[0].x && sarr[i].y === sarr[0].y) return true
+            }
+            if (sarr[0].x >= 18 || sarr[0].x <= 0 || sarr[0].y >= 18 || sarr[0].y <= 0) return true
+            return false
+        }
+
+        function gameEngine() {
+
+            if (isDead(snakeArr)) {
+                gameOverSound.play()
+                gameSound.pause()
+                inputDir = { x: 0, y: 0 }
+                scoreBox.innerHTML = "Game Over! Press arrow key"
+
+                snakeArr = [{ x: 13, y: 15 }]
+                score = 0
+                gameSound.play()
+            }
+
+            if (snakeArr[0].x === food.x && snakeArr[0].y === food.y) {
+                foodSound.play()
+                score++
+                scoreBox.innerHTML = "Score: " + score
+
+                if (score % 5 === 0) speed++
+
+                if (score > hiscore) {
+                    hiscore = score
+                    localStorage.setItem("hiScore", hiscore)
+                    hiScoreBox.innerHTML = "High Score: " + hiscore
+                }
+
+                snakeArr.unshift({ x: snakeArr[0].x + inputDir.x, y: snakeArr[0].y + inputDir.y })
+
+                let a = 2, b = 16
+                food = { x: Math.round(a + (b - a) * Math.random()), y: Math.round(a + (b - a) * Math.random()) }
+            }
+
+            for (let i = snakeArr.length - 2; i >= 0; i--) {
+                snakeArr[i + 1] = { ...snakeArr[i] }
+            }
+
+            snakeArr[0].x += inputDir.x
+            snakeArr[0].y += inputDir.y
+
+            board.innerHTML = ""
+
+            snakeArr.forEach((e, index) => {
+                let el = document.createElement('div')
+                el.style.gridRowStart = e.y
+                el.style.gridColumnStart = e.x
+                el.classList.add(index === 0 ? 'head' : 'snake')
+                board.appendChild(el)
+            })
+
+            let foodEl = document.createElement('div')
+            foodEl.style.gridRowStart = food.y
+            foodEl.style.gridColumnStart = food.x
+            foodEl.classList.add('food')
+            board.appendChild(foodEl)
+        }
+
+        let hiscore = localStorage.getItem("hiScore")
+        if (hiscore === null) {
+            hiscore = 0
+            localStorage.setItem("hiScore", 0)
+        }
+        hiScoreBox.innerHTML = "High Score: " + hiscore
+
+        window.requestAnimationFrame(main)
+
+        window.addEventListener('keydown', e => {
+            gameSound.play()
+            changeDirection.play()
+
+            switch (e.key) {
+                case "ArrowUp": inputDir = { x: 0, y: -1 }; break
+                case "ArrowDown": inputDir = { x: 0, y: 1 }; break
+                case "ArrowLeft": inputDir = { x: -1, y: 0 }; break
+                case "ArrowRight": inputDir = { x: 1, y: 0 }; break
+            }
+        })
+    </script>
+</body>
+
+</html>

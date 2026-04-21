@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Tic Tac Toe</title>
+
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial;
+            background: linear-gradient(135deg, #0f172a, #1e293b);
+            color: white;
+            text-align: center;
+        }
+
+        h1 {
+            margin-top: 20px;
+        }
+
+        #turn {
+            margin-top: 10px;
+            font-size: 18px;
+        }
+
+        .scoreboard {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin-top: 10px;
+            font-size: 18px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(3, 120px);
+            gap: 15px;
+            justify-content: center;
+            margin-top: 30px;
+        }
+
+        .cell {
+            height: 120px;
+            background: #334155;
+            border-radius: 15px;
+            font-size: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: .3s;
+        }
+
+        .cell:hover {
+            background: #475569;
+            transform: scale(1.05);
+        }
+
+        button {
+            margin-top: 25px;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 10px;
+            background: #22c55e;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>⭕ Tic Tac Toe ❌</h1>
+
+    <div id="turn">Turn: X</div>
+
+    <div class="scoreboard">
+        <div>❌ X Score: <span id="xScore">0</span></div>
+        <div>⭕ O Score: <span id="oScore">0</span></div>
+    </div>
+
+    <div class="grid" id="grid"></div>
+
+    <button onclick="resetBoard()">Reset Board</button>
+    <br><br>
+    <a href="index.html" style="color:white">⬅ Back</a>
+
+    <script>
+        const grid = document.getElementById("grid");
+        let turn = "X";
+        let board = ["", "", "", "", "", "", "", "", ""];
+        let xScore = 0;
+        let oScore = 0;
+
+        const winPatterns = [
+            [0, 1, 2], [3, 4, 5], [6, 7, 8],
+            [0, 3, 6], [1, 4, 7], [2, 5, 8],
+            [0, 4, 8], [2, 4, 6]
+        ];
+
+        // create cells
+        for (let i = 0; i < 9; i++) {
+            let cell = document.createElement("div");
+            cell.className = "cell";
+            cell.dataset.index = i;
+
+            cell.onclick = () => {
+                if (board[i] !== "") return;
+
+                board[i] = turn;
+                cell.innerText = turn;
+
+                if (checkWin()) {
+                    alert(turn + " wins!");
+
+                    if (turn === "X") {
+                        xScore++;
+                        document.getElementById("xScore").innerText = xScore;
+                    } else {
+                        oScore++;
+                        document.getElementById("oScore").innerText = oScore;
+                    }
+
+                    resetBoard();
+                    return;
+                }
+
+                turn = turn === "X" ? "O" : "X";
+                document.getElementById("turn").innerText = "Turn: " + turn;
+            };
+
+            grid.appendChild(cell);
+        }
+
+        function checkWin() {
+            return winPatterns.some(p => {
+                return board[p[0]] && board[p[0]] === board[p[1]] && board[p[1]] === board[p[2]];
+            });
+        }
+
+        function resetBoard() {
+            board = ["", "", "", "", "", "", "", "", ""];
+            grid.querySelectorAll(".cell").forEach(c => c.innerText = "");
+            turn = "X";
+            document.getElementById("turn").innerText = "Turn: X";
+        }
+    </script>
+
+</body>
+
+</html>

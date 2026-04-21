@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Joke Teller</title>
+
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial;
+            background: linear-gradient(135deg, #020617, #1e293b);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            text-align: center;
+        }
+
+        .card {
+            background: #334155;
+            padding: 30px;
+            border-radius: 20px;
+            width: 350px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, .4);
+            transition: .3s;
+        }
+
+        .card:hover {
+            transform: scale(1.03);
+        }
+
+        h1 {
+            margin-bottom: 10px;
+        }
+
+        #joke {
+            margin: 20px 0;
+            font-size: 18px;
+            min-height: 60px;
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 10px;
+            background: #22c55e;
+            color: white;
+            cursor: pointer;
+        }
+
+        .counter {
+            margin-top: 10px;
+            font-size: 14px;
+            opacity: .8;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="card">
+
+        <h1>😂 Joke Teller</h1>
+
+        <p id="joke">Click button for a joke</p>
+
+        <div class="controls">
+            <button onclick="getJoke()">New Joke</button>
+            <button onclick="copyJoke()">Copy</button>
+        </div>
+
+        <div class="counter">
+            Jokes seen: <span id="count">0</span>
+        </div>
+
+        <br>
+        <a href="index.html" style="color:white">⬅ Back</a>
+
+    </div>
+
+    <script>
+        const jokes = [
+            "Why do programmers hate nature? Too many bugs.",
+            "I told my computer I needed a break, it froze.",
+            "Why Java devs wear glasses? Because they can't C.",
+            "Debugging is like being a detective in a crime movie.",
+            "Programmer's wife: Turn off computer and come sleep. Programmer: After this commit.",
+            "Why did developer go broke? Because he used up all cache.",
+            "Frontend devs do it with style.",
+            "AI stole my job… but wrote my resume."
+        ];
+
+        let count = 0;
+
+        function getJoke() {
+            let r = Math.floor(Math.random() * jokes.length);
+            document.getElementById("joke").innerText = jokes[r];
+            count++;
+            document.getElementById("count").innerText = count;
+        }
+
+        function copyJoke() {
+            let text = document.getElementById("joke").innerText;
+            navigator.clipboard.writeText(text);
+            alert("Joke copied!");
+        }
+    </script>
+
+</body>
+
+</html>
